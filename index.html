@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SPX vs SPX6900</title>
+  <style>
+    body { background: black; color: white; font-family: monospace; display: flex; justify-content: center; padding: 2rem; }
+    canvas { border: 1px solid #fff; }
+  </style>
+</head>
+<body>
+  <canvas id="priceCanvas" width="512" height="256"></canvas>
+
+  <script>
+    const canvas = document.getElementById('priceCanvas');
+    const ctx = canvas.getContext('2d');
+    const halfWidth = canvas.width / 2;
+    const height = canvas.height;
+
+    async function getPriceData(symbol) {
+      if (symbol === 'spx') {
+        const response = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/^GSPC?range=1d&interval=1d');
+        const json = await response.json();
+        const last = json.chart.result[0].meta.regularMarketPrice;
+        const prev = json.chart.result[0].meta.chartPreviousClose;
+        const change = ((last - prev) / prev) * 100;
+        return { name: 'S&P 500', price: last.toFixed(2), change: (change >= 0 ? '+' : '') + change.toFixed(2) + '%' };
+      } else {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=spx6900&vs_currencies=usd&include_24hr_change=true');
+        const json = await response.json();
+        const price = json.spx6900.usd;
+        const change = json.spx6900.usd_24h_change;
+        return { name: 'S&P 6900', price: price.toFixed(5), change: (change >= 0 ? '+' : '') + change.toFixed(2) + '%' };
+      }
+    }
+
+    function drawBox(x, color, label, price, change) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, 0, halfWidth, height);
+
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+
+      ctx.font = '16px monospace';
+      ctx.fillText(label, x + halfWidth / 2, 60);
+
+      ctx.font = '28px monospace';
+      ctx.fillText(`$${price}`, x + halfWidth / 2, 120);
+
+      ctx.font = '20px monospace';
+      ctx.fillText(change, x + halfWidth / 2, 180);
+    }
+
+    async function render() {
+      const spx = await getPriceData('spx');
+      const spx6900 = await getPriceData('spx6900');
+
+      drawBox(0, parseFloat(spx.change) >= 0 ? 'green' : 'red', spx.name, spx.price, spx.change);
+      drawBox(halfWidth, parseFloat(spx6900.change) >= 0 ? 'green' : 'red', spx6900.name, spx6900.price, spx6900.change);
+
+      // Center line
+      ctx.beginPath();
+      ctx.moveTo(halfWidth, 0);
+      ctx.lineTo(halfWidth, height);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+    }
+
+    render();
+  </script>
+</body>
+</html>
