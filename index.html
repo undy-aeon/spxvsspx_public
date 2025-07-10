@@ -16,8 +16,9 @@
       height: 100vh;
     }
 
-    canvas {
-      display: block;
+    img {
+      max-width: 100%;
+      height: auto;
       border: 1px solid white;
     }
 
@@ -47,16 +48,22 @@
 </head>
 
 <body>
-  <canvas id="priceCanvas" width="969" height="370"></canvas>
+  <img id="resultImage" alt="SPX chart" />
   <button id="copyButton">Copy to Clipboard</button>
   <a id="downloadLink" download="spx_vs_spx6900.png">Download Image</a>
   <p id="errorMessage" class="error"></p>
 
   <script>
-    const canvas = document.getElementById('priceCanvas');
-    const ctx = canvas.getContext('2d');
-    const halfWidth = canvas.width / 2;
-    const height = canvas.height;
+    const width = 969;
+    const height = 370;
+    const halfWidth = width / 2;
+
+    function createCanvas() {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      return canvas;
+    }
 
     async function getPriceData(symbol) {
       if (symbol === 'spx') {
@@ -81,7 +88,7 @@
       } else {
         const json = {
           "spx6900": {
-            "usd": 1.45,
+            "usd": 1.42,
             "usd_24h_change": 6.65
           }
         };
@@ -95,30 +102,33 @@
       }
     }
 
-    function drawBox(x, color, label, price, change) {
-      ctx.fillStyle = color;
-      ctx.fillRect(x, 0, halfWidth, height);
-
+    function drawChart(ctx, spx, spx6900) {
+      // SPX Box
+      ctx.fillStyle = 'green';
+      ctx.fillRect(0, 0, halfWidth, height);
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
 
       ctx.font = "20px 'Courier New', monospace";
-      ctx.fillText(label, x + halfWidth / 2, 120);
-
+      ctx.fillText(spx.name, halfWidth / 2, 120);
       ctx.font = "48px 'Courier New', monospace";
-      ctx.fillText(`$${price}`, x + halfWidth / 2, 190);
-
+      ctx.fillText(`$${spx.price}`, halfWidth / 2, 190);
       ctx.font = "30px 'Courier New', monospace";
-      ctx.fillText(change, x + halfWidth / 2, 250);
-    }
+      ctx.fillText(spx.change, halfWidth / 2, 250);
 
-    async function render() {
-      const spx = await getPriceData('spx');
-      const spx6900 = await getPriceData('spx6900');
+      // SPX6900 Box
+      ctx.fillStyle = 'green';
+      ctx.fillRect(halfWidth, 0, halfWidth, height);
+      ctx.fillStyle = 'white';
 
-      drawBox(0, 'green', spx.name, spx.price, spx.change);
-      drawBox(halfWidth, 'green', spx6900.name, spx6900.price, spx6900.change);
+      ctx.font = "20px 'Courier New', monospace";
+      ctx.fillText(spx6900.name, halfWidth + halfWidth / 2, 120);
+      ctx.font = "48px 'Courier New', monospace";
+      ctx.fillText(`$${spx6900.price}`, halfWidth + halfWidth / 2, 190);
+      ctx.font = "30px 'Courier New', monospace";
+      ctx.fillText(spx6900.change, halfWidth + halfWidth / 2, 250);
 
+      // Divider line
       ctx.beginPath();
       ctx.moveTo(halfWidth, 0);
       ctx.lineTo(halfWidth, height);
@@ -139,15 +149,36 @@
       });
     }
 
-    async function copyCanvasContentsToClipboard() {
+    async function renderChartImage() {
+      const canvas = createCanvas();
+      const ctx = canvas.getContext('2d');
+
+      const spx = await getPriceData('spx');
+      const spx6900 = await getPriceData('spx6900');
+
+      drawChart(ctx, spx, spx6900);
+
+      const img = document.getElementById('resultImage');
+      img.src = canvas.toDataURL('image/png');
+
+      const blob = await getBlobFromCanvas(canvas);
+      const url = URL.createObjectURL(blob);
+
+      const downloadLink = document.getElementById('downloadLink');
+      downloadLink.href = url;
+      downloadLink.style.display = 'inline-block';
+
+      return blob;
+    }
+
+    async function copyImageToClipboard(blob) {
       const errorMessage = document.getElementById('errorMessage');
       errorMessage.style.display = 'none';
 
       try {
-        const blob = await getBlobFromCanvas(canvas);
         const item = new ClipboardItem({ 'image/png': blob });
         await navigator.clipboard.write([item]);
-        errorMessage.textContent = 'Canvas copied to clipboard!';
+        errorMessage.textContent = 'Image copied to clipboard!';
         errorMessage.style.color = 'green';
         errorMessage.style.display = 'block';
       } catch (err) {
@@ -158,22 +189,17 @@
       }
     }
 
-    async function setupDownloadFallback() {
-      const blob = await getBlobFromCanvas(canvas);
-      const url = URL.createObjectURL(blob);
-      const link = document.getElementById('downloadLink');
-      link.href = url;
-      link.style.display = 'inline-block';
-    }
+    document.getElementById('copyButton').addEventListener('click', async () => {
+      const blob = await renderChartImage();
+      await copyImageToClipboard(blob);
+    });
 
-    document.getElementById('copyButton').addEventListener('click', copyCanvasContentsToClipboard);
+    (async function init() {
+      const blob = await renderChartImage();
 
-    (async function initialize() {
-      await render();
       if (!isClipboardImageCopySupported()) {
         document.getElementById('copyButton').style.display = 'none';
-        await setupDownloadFallback();
-        document.getElementById('errorMessage').textContent = 'Copy to clipboard not supported on mobile. Use download.';
+        document.getElementById('errorMessage').textContent = 'Long-press image on mobile to save or share.';
         document.getElementById('errorMessage').style.color = 'orange';
         document.getElementById('errorMessage').style.display = 'block';
       }
