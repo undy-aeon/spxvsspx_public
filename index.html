@@ -49,7 +49,7 @@
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
 
-      const font = "Helvetica";
+      const font = "Avenir LT Std 85 Heavy";
       ctx.font = `18px ${font}`;
       ctx.fillText(label, x + halfWidth / 2, 60);
 
@@ -61,7 +61,7 @@
     }
 
     async function render() {
-      const font = new FontFace('DOSVGA', 'url("Comic Sans MS 400.ttf")');
+      const font = new FontFace('myfont', 'url("Comic Sans MS 400.ttf")');
       await font.load();
       document.fonts.add(font);
 
