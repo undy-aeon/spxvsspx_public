@@ -19,14 +19,14 @@
 
     async function getPriceData(symbol) {
       if (symbol === 'spx') {
-        const response = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/^GSPC?range=1d&interval=1d');
+        const response = await fetch('https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=1d&interval=1d');
         const json = await response.json();
         const last = json.chart.result[0].meta.regularMarketPrice;
         const prev = json.chart.result[0].meta.chartPreviousClose;
         const change = ((last - prev) / prev) * 100;
         return { name: 'S&P 500', price: last.toFixed(2), change: (change >= 0 ? '+' : '') + change.toFixed(2) + '%' };
       } else {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=spx6900&vs_currencies=usd&include_24hr_change=true');
+        const response = await fetch('https://corsproxy.io/?https://api.coingecko.com/api/v3/simple/price?ids=spx6900&vs_currencies=usd&include_24hr_change=true');
         const json = await response.json();
         const price = json.spx6900.usd;
         const change = json.spx6900.usd_24h_change;
