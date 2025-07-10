@@ -10,9 +10,9 @@
   <canvas id="priceCanvas" width="512" height="256"></canvas>
 
   <div>
-    <button id="copyBtn">Copy Image</button>
+    <button id="copyButton">Copy to Clipboard</button>
   </div>
-  
+
   <script>
     const canvas = document.getElementById('priceCanvas');
     const ctx = canvas.getContext('2d');
@@ -76,17 +76,30 @@
 
     render();
 
-    document.getElementById('copyBtn').addEventListener('click', async () => {
+    async function getBlobFromCanvas(canvas) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Canvas toBlob failed"));
+          }
+        });
+      });
+    }
+
+    async function copyCanvasContentsToClipboard() {
       try {
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        const item = new ClipboardItem({ 'image/png': blob });
-        await navigator.clipboard.write([item]);
-        alert('Image copied to clipboard!');
+        const blob = await getBlobFromCanvas(canvas);
+        const clipboardItem = new ClipboardItem({ [blob.type]: blob });
+        await navigator.clipboard.write([clipboardItem]);
+        console.log('Canvas copied to clipboard');
       } catch (err) {
-        alert('Clipboard copy failed. Try using Chrome or Edge.');
-        console.error(err);
+        console.error('Failed to copy canvas:', err);
       }
-    });
+    }
+
+    document.getElementById('copyButton').addEventListener('click', copyCanvasContentsToClipboard);
   </script>
 
 
