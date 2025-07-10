@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>SPX vs SPX6900</title>
   <style>
-    body { background: black; color: white; font-family: monospace; display: flex; justify-content: center; padding: 2rem; }
-    canvas { border: 1px solid #fff; }
+    body {
+      background: black;
+      color: white;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    canvas {
+      border: 1px solid #fff;
+    }
   </style>
 </head>
+
 <body>
   <canvas id="priceCanvas" width="512" height="256"></canvas>
 
@@ -41,17 +53,24 @@
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
 
-      ctx.font = '16px "Lucida Console", "Courier New", monospace';
+      ctx.font = '16px "Px437 IBM VGA8"';
       ctx.fillText(label, x + halfWidth / 2, 60);
 
-      ctx.font = '28px "Lucida Console", "Courier New", monospace';
+      ctx.font = '28px "Px437 IBM VGA8"';
       ctx.fillText(`$${price}`, x + halfWidth / 2, 120);
 
-      ctx.font = '20px "Lucida Console", "Courier New", monospace';
+      ctx.font = '20px "Px437 IBM VGA8"';
       ctx.fillText(change, x + halfWidth / 2, 180);
     }
 
     async function render() {
+      const font = new FontFace(
+        'Px437 IBM VGA8',
+        'url(https://unpkg.com/terminal-fonts@1.0.5/fonts/IBMVGA8.woff2)'
+      );
+      await font.load();
+      document.fonts.add(font);
+
       const spx = await getPriceData('spx');
       const spx6900 = await getPriceData('spx6900');
 
@@ -70,4 +89,5 @@
     render();
   </script>
 </body>
+
 </html>
