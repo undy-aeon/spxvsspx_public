@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>SPX vs SPX6900</title>
   <style>
-    body { background: black; color: white; font-family: monospace; display: flex; justify-content: center; padding: 2rem; }
-    canvas { border: 1px solid #fff; }
+    body {
+      background: black;
+      color: white;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    canvas {
+      border: 1px solid #fff;
+    }
   </style>
 </head>
+
 <body>
   <canvas id="priceCanvas" width="512" height="256"></canvas>
 
@@ -41,17 +53,24 @@
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
 
-      ctx.font = '16px monospace';
+      ctx.font = '16px "Space Mono"';
       ctx.fillText(label, x + halfWidth / 2, 60);
 
-      ctx.font = '28px monospace';
+      ctx.font = '28px "Space Mono"';
       ctx.fillText(`$${price}`, x + halfWidth / 2, 120);
 
-      ctx.font = '20px monospace';
+      ctx.font = '20px "Space Mono"';
       ctx.fillText(change, x + halfWidth / 2, 180);
     }
 
     async function render() {
+      const font = new FontFace(
+        'Space Mono',
+        'url(https://fonts.gstatic.com/s/spacemono/v13/i7dPIFZifjKcF5UAWdDRYEF8RQ.woff2)'
+      );
+      await font.load();
+      document.fonts.add(font);
+
       const spx = await getPriceData('spx');
       const spx6900 = await getPriceData('spx6900');
 
@@ -70,4 +89,5 @@
     render();
   </script>
 </body>
+
 </html>
