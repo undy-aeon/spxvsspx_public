@@ -53,7 +53,7 @@
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
 
-      const font = "VT323";
+      const font = "DOSVGA";
       ctx.font = `16px ${font}`;
       ctx.fillText(label, x + halfWidth / 2, 60);
 
@@ -65,10 +65,7 @@
     }
 
     async function render() {
-      const font = new FontFace(
-        'VT323',
-        'url(https://fonts.gstatic.com/s/vt323/v17/pxiKyp0ihIEF2isQFJXGdg.woff2)'
-      );
+      const font = new FontFace('DOSVGA', 'url("MorePerfectDOSVGA.ttf")');
       await font.load();
       document.fonts.add(font);
 
