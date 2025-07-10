@@ -2,19 +2,55 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=969, initial-scale=1" />
   <title>SPX vs SPX6900</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    canvas {
+      display: block;
+      border: 1px solid white;
+    }
+
+    button, a {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-family: sans-serif;
+      background-color: #444;
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    a {
+      display: none;
+    }
+
+    .error {
+      font-family: sans-serif;
+      font-size: 14px;
+      color: red;
+      margin-top: 8px;
+    }
+  </style>
 </head>
 
 <body>
-  <canvas id="priceCanvas" width="512" height="256"></canvas>
-
-  <div>
-    <button id="copyButton">Copy to Clipboard</button>
-    <p id="errorMessage" class="error"></p>
-  </div>
+  <canvas id="priceCanvas" width="969" height="370"></canvas>
+  <button id="copyButton">Copy to Clipboard</button>
+  <a id="downloadLink" download="spx_vs_spx6900.png">Download Image</a>
+  <p id="errorMessage" class="error"></p>
 
   <script>
     const canvas = document.getElementById('priceCanvas');
@@ -24,20 +60,38 @@
 
     async function getPriceData(symbol) {
       if (symbol === 'spx') {
-        //const response = await fetch('https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=1d&interval=1d');
-        //const json = await response.json();
-        const json = { "chart": { "result": [{ "meta": { "currency": "USD", "symbol": "^GSPC", "exchangeName": "SNP", "fullExchangeName": "SNP", "instrumentType": "INDEX", "firstTradeDate": -1325583000, "regularMarketTime": 1752180748, "hasPrePostMarketData": false, "gmtoffset": -14400, "timezone": "EDT", "exchangeTimezoneName": "America/New_York", "regularMarketPrice": 6280.46, "fiftyTwoWeekHigh": 6290.22, "fiftyTwoWeekLow": 4835.04, "regularMarketDayHigh": 6290.22, "regularMarketDayLow": 6251.44, "regularMarketVolume": 2828822000, "longName": "S&P 500", "shortName": "S&P 500", "chartPreviousClose": 6263.26, "priceHint": 2, "currentTradingPeriod": { "pre": { "timezone": "EDT", "start": 1752134400, "end": 1752154200, "gmtoffset": -14400 }, "regular": { "timezone": "EDT", "start": 1752154200, "end": 1752177600, "gmtoffset": -14400 }, "post": { "timezone": "EDT", "start": 1752177600, "end": 1752192000, "gmtoffset": -14400 } }, "dataGranularity": "1d", "range": "1d", "validRanges": ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"] }, "timestamp": [1752180748], "indicators": { "quote": [{ "open": [6266.7998046875], "volume": [2828822000], "low": [6251.43994140625], "close": [6280.4599609375], "high": [6290.22021484375] }], "adjclose": [{ "adjclose": [6280.4599609375] }] } }], "error": null } };
+        const json = {
+          chart: {
+            result: [{
+              meta: {
+                regularMarketPrice: 6251.25,
+                chartPreviousClose: 6225.85
+              }
+            }]
+          }
+        };
         const last = json.chart.result[0].meta.regularMarketPrice;
         const prev = json.chart.result[0].meta.chartPreviousClose;
         const change = ((last - prev) / prev) * 100;
-        return { name: 'S&P 500', price: last.toFixed(2), change: (change >= 0 ? '+' : '') + change.toFixed(2) + '%' };
+        return {
+          name: 'S&P 500',
+          price: last.toFixed(2),
+          change: (change >= 0 ? '+' : '') + change.toFixed(2) + '%'
+        };
       } else {
-        //const response = await fetch('https://corsproxy.io/?https://api.coingecko.com/api/v3/simple/price?ids=spx6900&vs_currencies=usd&include_24hr_change=true');
-        //const json = await response.json();
-        const json = { "spx6900": { "usd": 1.57, "usd_24h_change": 6.207273452132412 } };
+        const json = {
+          "spx6900": {
+            "usd": 1.45,
+            "usd_24h_change": 6.65
+          }
+        };
         const price = json.spx6900.usd;
         const change = json.spx6900.usd_24h_change;
-        return { name: 'S&P 6900', price: price.toFixed(5), change: (change >= 0 ? '+' : '') + change.toFixed(2) + '%' };
+        return {
+          name: 'S&P 6900',
+          price: price.toFixed(5),
+          change: (change >= 0 ? '+' : '') + change.toFixed(2) + '%'
+        };
       }
     }
 
@@ -48,29 +102,23 @@
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
 
-      const font = "myfont";
-      ctx.font = `18px ${font}`;
-      ctx.fillText(label, x + halfWidth / 2, 60);
+      ctx.font = "20px 'Courier New', monospace";
+      ctx.fillText(label, x + halfWidth / 2, 120);
 
-      ctx.font = `28px ${font}`;
-      ctx.fillText(`$${price}`, x + halfWidth / 2, 120);
+      ctx.font = "48px 'Courier New', monospace";
+      ctx.fillText(`$${price}`, x + halfWidth / 2, 190);
 
-      ctx.font = `20px ${font}`;
-      ctx.fillText(change, x + halfWidth / 2, 180);
+      ctx.font = "30px 'Courier New', monospace";
+      ctx.fillText(change, x + halfWidth / 2, 250);
     }
 
     async function render() {
-      const font = new FontFace('myfont', 'url("Comic Sans MS 400.ttf")');
-      await font.load();
-      document.fonts.add(font);
-
       const spx = await getPriceData('spx');
       const spx6900 = await getPriceData('spx6900');
 
-      drawBox(0, parseFloat(spx.change) >= 0 ? 'green' : 'red', spx.name, spx.price, spx.change);
-      drawBox(halfWidth, parseFloat(spx6900.change) >= 0 ? 'green' : 'red', spx6900.name, spx6900.price, spx6900.change);
+      drawBox(0, 'green', spx.name, spx.price, spx.change);
+      drawBox(halfWidth, 'green', spx6900.name, spx6900.price, spx6900.change);
 
-      // Center line
       ctx.beginPath();
       ctx.moveTo(halfWidth, 0);
       ctx.lineTo(halfWidth, height);
@@ -79,17 +127,15 @@
       ctx.stroke();
     }
 
-    render();
+    function isClipboardImageCopySupported() {
+      return navigator.clipboard &&
+        window.ClipboardItem &&
+        !/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    }
 
     async function getBlobFromCanvas(canvas) {
       return new Promise((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error("Canvas toBlob failed"));
-          }
-        });
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("toBlob failed")), 'image/png');
       });
     }
 
@@ -97,31 +143,42 @@
       const errorMessage = document.getElementById('errorMessage');
       errorMessage.style.display = 'none';
 
-      // Check Clipboard API support
-      if (!navigator.clipboard || !window.ClipboardItem) {
-        errorMessage.textContent = 'Clipboard copying is not supported in this browser.';
-        errorMessage.style.display = 'block';
-        return;
-      }
-
       try {
         const blob = await getBlobFromCanvas(canvas);
-        const clipboardItem = new ClipboardItem({ 'image/png': blob });
-        await navigator.clipboard.write([clipboardItem]);
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
         errorMessage.textContent = 'Canvas copied to clipboard!';
-        errorMessage.style.display = 'block';
         errorMessage.style.color = 'green';
+        errorMessage.style.display = 'block';
       } catch (err) {
-        console.error('Failed to copy canvas:', err);
-        errorMessage.textContent = 'Failed to copy to clipboard. Please try again.';
+        console.error(err);
+        errorMessage.textContent = 'Failed to copy to clipboard.';
+        errorMessage.style.color = 'red';
         errorMessage.style.display = 'block';
       }
     }
 
+    async function setupDownloadFallback() {
+      const blob = await getBlobFromCanvas(canvas);
+      const url = URL.createObjectURL(blob);
+      const link = document.getElementById('downloadLink');
+      link.href = url;
+      link.style.display = 'inline-block';
+    }
+
     document.getElementById('copyButton').addEventListener('click', copyCanvasContentsToClipboard);
+
+    (async function initialize() {
+      await render();
+      if (!isClipboardImageCopySupported()) {
+        document.getElementById('copyButton').style.display = 'none';
+        await setupDownloadFallback();
+        document.getElementById('errorMessage').textContent = 'Copy to clipboard not supported on mobile. Use download.';
+        document.getElementById('errorMessage').style.color = 'orange';
+        document.getElementById('errorMessage').style.display = 'block';
+      }
+    })();
   </script>
-
-
 </body>
 
 </html>
