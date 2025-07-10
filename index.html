@@ -81,7 +81,22 @@
     }
 
     render();
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      try {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        alert('Image copied to clipboard!');
+      } catch (err) {
+        alert('Clipboard copy failed. Try using Chrome or Edge.');
+        console.error(err);
+      }
+    });
   </script>
+
+  <button id="copyBtn" title="Copy to clipboard" style="margin-left: 1rem; background: none; border: none; cursor: pointer; font-size: 24px;">📋</button>
+
 </body>
 
 </html>
