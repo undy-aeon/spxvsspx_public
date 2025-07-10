@@ -53,20 +53,21 @@
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
 
-      ctx.font = '16px "Px437 IBM VGA8"';
+      const font = "VT323";
+      ctx.font = `16px ${font}`;
       ctx.fillText(label, x + halfWidth / 2, 60);
 
-      ctx.font = '28px "Px437 IBM VGA8"';
+      ctx.font = `28px ${font}`;
       ctx.fillText(`$${price}`, x + halfWidth / 2, 120);
 
-      ctx.font = '20px "Px437 IBM VGA8"';
+      ctx.font = `20px ${font}`;
       ctx.fillText(change, x + halfWidth / 2, 180);
     }
 
     async function render() {
       const font = new FontFace(
-        'Px437 IBM VGA8',
-        'url(https://unpkg.com/terminal-fonts@1.0.5/fonts/IBMVGA8.woff2)'
+        'VT323',
+        'url(https://fonts.gstatic.com/s/vt323/v19/pxiKyp0ihIEF2isfFJXUdVNF.woff2)'
       );
       await font.load();
       document.fonts.add(font);
