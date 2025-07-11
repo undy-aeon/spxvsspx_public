@@ -32,7 +32,6 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      display: none;
     }
 
     .error {
@@ -46,16 +45,20 @@
 
 <body>
   <img id="resultImage" alt="SPX chart" />
+  <button id="downloadBtn">Open Image</button>
 
   <script>
-    const width = 969;
-    const height = 370;
+    const zoomLevel = 4;  // Change this value to control the zoom level (e.g., 2, 4, 8, etc.)
+    const originalWidth = 969;
+    const originalHeight = 370;
+    const width = originalWidth * zoomLevel;  // Scale width by zoom level
+    const height = originalHeight * zoomLevel;  // Scale height by zoom level
     const halfWidth = width / 2;
 
     function createCanvas() {
       const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = width;  // Set to the new width based on zoom level
+      canvas.height = height;  // Set to the new height based on zoom level
       return canvas;
     }
 
@@ -95,30 +98,30 @@
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
 
-      const nameFontSize = 34;
-      const priceFontSize = 48;
-      const changeFontSize = 30;
+      const nameFontSize = 34 * zoomLevel;  // Scale font size by zoom level
+      const priceFontSize = 48 * zoomLevel;  // Scale font size by zoom level
+      const changeFontSize = 30 * zoomLevel;  // Scale font size by zoom level
 
-      // Draw the SPX chart text
+      // Draw the SPX chart text with scaled position
       ctx.font = `${nameFontSize}px "${fontName}"`;
-      ctx.fillText(spx.name, halfWidth / 2, 120);
+      ctx.fillText(spx.name, halfWidth / 2, 120 * zoomLevel);  // Scale position by zoom level
       ctx.font = `${priceFontSize}px "${fontName}"`;
-      ctx.fillText(`$${spx.price}`, halfWidth / 2, 190);
+      ctx.fillText(`$${spx.price}`, halfWidth / 2, 190 * zoomLevel);  // Scale position by zoom level
       ctx.font = `${changeFontSize}px "${fontName}"`;
-      ctx.fillText(spx.change, halfWidth / 2, 260);
+      ctx.fillText(spx.change, halfWidth / 2, 260 * zoomLevel);  // Scale position by zoom level
 
       // Draw the SPX6900 chart background
       ctx.fillStyle = spx6900BackgroundColor;
       ctx.fillRect(halfWidth, 0, halfWidth, height);
       ctx.fillStyle = 'white';
 
-      // Draw the SPX6900 chart text
+      // Draw the SPX6900 chart text with scaled position
       ctx.font = `${nameFontSize}px "${fontName}"`;
-      ctx.fillText(spx6900.name, halfWidth + halfWidth / 2, 120);
+      ctx.fillText(spx6900.name, halfWidth + halfWidth / 2, 120 * zoomLevel);  // Scale position by zoom level
       ctx.font = `${priceFontSize}px "${fontName}"`;
-      ctx.fillText(`$${spx6900.price}`, halfWidth + halfWidth / 2, 190);
+      ctx.fillText(`$${spx6900.price}`, halfWidth + halfWidth / 2, 190 * zoomLevel);  // Scale position by zoom level
       ctx.font = `${changeFontSize}px "${fontName}"`;
-      ctx.fillText(spx6900.change, halfWidth + halfWidth / 2, 260);
+      ctx.fillText(spx6900.change, halfWidth + halfWidth / 2, 260 * zoomLevel);  // Scale position by zoom level
 
       // Draw the separator line
       ctx.beginPath();
@@ -129,9 +132,9 @@
       ctx.stroke();
     }
 
-
     async function getBlobFromCanvas(canvas) {
       return new Promise((resolve, reject) => {
+        // Using PNG format to avoid resampling on clipboard
         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("toBlob failed")), 'image/png');
       });
     }
@@ -161,8 +164,21 @@
       const blob = await getBlobFromCanvas(canvas);
       const url = URL.createObjectURL(blob);
 
-      return blob;
+      return url;
     }
+
+    // Add event listener for the "Open Image" button
+    document.getElementById('downloadBtn').addEventListener('click', async () => {
+      const url = await renderChartImage();
+
+      // Open the image in a new tab
+      const newWindow = window.open(url, '_blank');
+
+      // Check if the window opened successfully
+      if (newWindow) {
+        newWindow.focus();
+      }
+    });
 
     (async function init() {
       try {
