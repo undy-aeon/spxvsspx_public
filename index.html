@@ -85,7 +85,12 @@
     }
 
     function drawChart(ctx, spx, spx6900, fontName) {
-      ctx.fillStyle = 'green';
+      // Determine background color based on percentage change
+      const spxBackgroundColor = spx.change.includes('-') ? 'red' : 'green';
+      const spx6900BackgroundColor = spx6900.change.includes('-') ? 'red' : 'green';
+
+      // Draw the SPX chart background
+      ctx.fillStyle = spxBackgroundColor;
       ctx.fillRect(0, 0, halfWidth, height);
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
@@ -94,6 +99,7 @@
       const priceFontSize = 48;
       const changeFontSize = 30;
 
+      // Draw the SPX chart text
       ctx.font = `${nameFontSize}px "${fontName}"`;
       ctx.fillText(spx.name, halfWidth / 2, 120);
       ctx.font = `${priceFontSize}px "${fontName}"`;
@@ -101,10 +107,12 @@
       ctx.font = `${changeFontSize}px "${fontName}"`;
       ctx.fillText(spx.change, halfWidth / 2, 260);
 
-      ctx.fillStyle = 'green';
+      // Draw the SPX6900 chart background
+      ctx.fillStyle = spx6900BackgroundColor;
       ctx.fillRect(halfWidth, 0, halfWidth, height);
       ctx.fillStyle = 'white';
 
+      // Draw the SPX6900 chart text
       ctx.font = `${nameFontSize}px "${fontName}"`;
       ctx.fillText(spx6900.name, halfWidth + halfWidth / 2, 120);
       ctx.font = `${priceFontSize}px "${fontName}"`;
@@ -112,6 +120,7 @@
       ctx.font = `${changeFontSize}px "${fontName}"`;
       ctx.fillText(spx6900.change, halfWidth + halfWidth / 2, 260);
 
+      // Draw the separator line
       ctx.beginPath();
       ctx.moveTo(halfWidth, 0);
       ctx.lineTo(halfWidth, height);
@@ -119,6 +128,7 @@
       ctx.strokeStyle = 'white';
       ctx.stroke();
     }
+
 
     async function getBlobFromCanvas(canvas) {
       return new Promise((resolve, reject) => {
